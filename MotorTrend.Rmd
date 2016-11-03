@@ -1,0 +1,56 @@
+---
+title: "Motor Trend"
+author: "Shun-Wen Chang"
+date: "November 21, 2015"
+output: pdf_document
+---
+#Regression Model Course Project#
+##Executive Summary##
+This project explores the relationship between a set of variables and miles per gallon (MPG) in mtcars data set. In particular, this project determins whether an automatic or manual transmission is better for MPG, and quantifies the difference. In my simple model, the mean MPG difference is 7.245 MPG; the average MPG for cars with automatic transmissions is 17.147 MPG; the average MPG for cars with manual transmissions is 24.392 MPG. The result shows that manual transmission is bettern in terms of MPG.
+
+Exploratory analysis is located in the Appendix.
+
+##Analysis##
+
+```{r, echo=FALSE}
+data(mtcars)
+alpha <- 0.05
+fit <- lm(mpg ~ am, data=mtcars)
+coef(summary(fit))
+```
+The intercept means the mean MPG for automatic transmissions. The slope means the increase in MPG from cars with manual transmission (am=1). The sum (intercept+slope) is the mean MPG for manual transmissions.
+
+Now we calculate the 95% confidence interval for the MPG difference:
+
+```{r, echo=FALSE}
+n <- length(mtcars$mpg)
+pe <- coef(summary(fit))["am","Estimate"]
+se <- coef(summary(fit))["am","Std. Error"]
+tstat <- qt(1 - alpha/2, n-2)
+pe + c(-1,1)*(se*tstat)
+```
+
+The p-value for the MPG difference is small and the interval does not include zero, so we can reject null hypothesis. 
+
+##Appendix##
+###Residual Plot###
+
+```{r, echo=FALSE}
+mar.orig <- par()$mar
+par(mar = c(2,2,2,2))
+bestfit <- lm(mpg ~ wt + qsec + am, data = mtcars)
+plot(bestfit, which = c(1:1))
+```
+
+###Histogram###
+
+```{r, echo=FALSE}
+mtcars_vars <- mtcars[, c(1, 6, 7, 9)]
+library(ggplot2)
+library(gridExtra)
+mpg_dist <- qplot(mtcars_vars$mpg, fill = I("black"))
+wt_dist <- qplot(mtcars_vars$wt, fill = I("blue"))
+qsec_dist <- qplot(mtcars_vars$qsec, fill = I("red"))
+am_dist <- qplot(mtcars_vars$am, fill = I("orange"))
+grid.arrange(mpg_dist, wt_dist, qsec_dist, am_dist, ncol = 2)
+```
